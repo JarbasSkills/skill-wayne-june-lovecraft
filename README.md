@@ -30,6 +30,6 @@ Included readings are:
 ## Tags
 #audio 
 #books
-#radio theatre
+#readings
 #lovecraft
 #entertainment

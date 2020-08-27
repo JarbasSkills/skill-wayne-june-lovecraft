@@ -16,6 +16,11 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
             self.settings["download_audio"] = True
         if "audio_only" not in self.settings:
             self.settings["audio_only"] = False
+
+        self.lovecraft_stories = ["shunned_house", "tomb", "thing_doorstep"]
+        # TODO other authors
+        self.stories = [] + self.lovecraft_stories
+
         self.urls = {
             # these 3 are in official account
             "tomb": "https://www.youtube.com/watch?v=6yIqQ2O-zws",
@@ -70,10 +75,13 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
 
         return utt
 
-    def clean_vocs(self, phrase):
+    def clean_vocs(self, phrase, authors=False):
         phrase = self.remove_voc(phrase, "reading")
         phrase = self.remove_voc(phrase, "audio_theatre")
         phrase = self.remove_voc(phrase, "play")
+        if authors:
+            phrase = self.remove_voc(phrase, "lovecraft")
+            phrase = self.remove_voc(phrase, "wayne_june")
         phrase = phrase.strip()
         return phrase
 
@@ -82,7 +90,7 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
         original = phrase
         match = None
         score = 0
-        story = random.choice(["shunned_house", "tomb", "thing_doorstep"])
+        story = random.choice(self.stories)
 
         if media_type == CPSMatchType.AUDIOBOOK or \
                 self.voc_match(original, "reading"):
@@ -98,6 +106,9 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
         if self.voc_match(phrase, "lovecraft"):
             score += 0.3
             match = CPSMatchLevel.ARTIST
+            story = random.choice(self.lovecraft_stories)
+
+        # TODO readings of other authors by wayne june
 
         if self.voc_match(phrase, "wayne_june"):
             score += 0.3
@@ -135,6 +146,9 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
                 match = CPSMatchLevel.MULTI_KEY
             else:
                 match = CPSMatchLevel.TITLE
+        else:
+            # TODO fuzzy match story name
+            title = self.clean_vocs(phrase, authors=True)
 
         if score >= 0.9:
             match = CPSMatchLevel.EXACT
