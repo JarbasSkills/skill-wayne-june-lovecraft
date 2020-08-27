@@ -32,6 +32,14 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
         self.add_event('skill-wayne-june-lovecraft.jarbasskills.home',
                        self.handle_homescreen)
 
+        # speed up playback, download + convert in advance
+        if self.settings["download_audio"]:
+            for story in self.urls:
+                try:
+                    self.get_audio_stream(self.urls[story], True)
+                except:
+                    pass
+
     def get_intro_message(self):
         self.speak_dialog("intro")
         self.gui.show_image(join(dirname(__file__), "ui", "logo.png"))
@@ -78,7 +86,7 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
 
         if self.voc_match(original, "audio_theatre"):
             score += 0.1
-            match = CPSMatchLevel.CATEGORY
+            match = CPSMatchLevel.GENERIC
 
         phrase = self.clean_vocs(phrase)
 
@@ -89,6 +97,9 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
         if self.voc_match(phrase, "wayne_june"):
             score += 0.3
             match = CPSMatchLevel.ARTIST
+            if self.voc_match(phrase, "lovecraft"):
+                score += 0.1
+                match = CPSMatchLevel.MULTI_KEY
 
         if self.voc_match(phrase, "shunned_house"):
             score += 0.7
@@ -135,6 +146,7 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
         self.audioservice.play(url, utterance=self.play_service_string)
         self.CPS_send_status(uri=url,
                              playlist_position=0,
+                             image=join(dirname(__file__), "ui", "logo.png"),
                              status=CPSTrackStatus.PLAYING_AUDIOSERVICE)
 
     # youtube handling
