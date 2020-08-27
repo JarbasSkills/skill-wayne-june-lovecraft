@@ -21,7 +21,6 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
             "tomb": "https://www.youtube.com/watch?v=6yIqQ2O-zws",
             "thing_doorstep": "https://www.youtube.com/watch?v=PicZATCo3h4",
             "virgin_finlay": "https://www.youtube.com/watch?v=zf_Il12Tgn8",
-
             # these are likely to be taken down soon
             "shunned_house": "https://www.youtube.com/watch?v=77xxGopjMbY",
 
