@@ -82,11 +82,11 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
 
         phrase = self.clean_vocs(phrase)
 
-        if self.voc_match(phrase, "wayne_june"):
+        if self.voc_match(phrase, "lovecraft"):
             score += 0.3
             match = CPSMatchLevel.CATEGORY
 
-        if self.voc_match(phrase, "lovecraft"):
+        if self.voc_match(phrase, "wayne_june"):
             score += 0.3
             match = CPSMatchLevel.ARTIST
 
@@ -97,7 +97,8 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
                 match = CPSMatchLevel.MULTI_KEY
             else:
                 match = CPSMatchLevel.TITLE
-        elif self.voc_match(phrase, "thing_on_doorstep"):
+        elif self.voc_match(phrase, "thing") and \
+                self.voc_match(phrase, "doorstep"):
             score += 0.7
             story = "thing_doorstep"
             if match is not None:
