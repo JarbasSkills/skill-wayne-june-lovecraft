@@ -1,0 +1,23 @@
+{
+  "name": "Wayne June Lovecraft Readings Skill",
+  "skillname": "skill-wayne-june-lovecraft",
+  "authorname": "JarbasSkills",
+  "foldername": "",
+  "url": "https://github.com/JarbasSkills/skill-wayne-june-lovecraft",
+  "branch": "master",
+  "desktopFile": false,
+  "warning": "",
+  "systemDeps": false,
+  "platforms": [
+    "arm",
+    "arm64",
+    "i386",
+    "x86_64",
+    "ia64"
+  ],
+  "examples": [
+    "read the thing on the doorstep by lovecraft",
+    "play the tomb audiobook",
+    "read the shunned house"
+  ]
+}

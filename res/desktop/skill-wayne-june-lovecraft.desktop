@@ -1,0 +1,10 @@
+[Desktop Entry]
+Terminal=false
+Type=Application
+Name=Wayne June Lovecraft Readings Skill
+Exec=mycroft-gui-app --hideTextInput --skill=skill-wayne-june-lovecraft.jarbasskills.home
+Icon=icon.png
+Categories=VoiceApp
+StartupNotify=false
+X-DBUS-StartupType=None
+X-KDE-StartupNotify=false
