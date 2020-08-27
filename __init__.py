@@ -117,14 +117,18 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
                 score += 0.1
                 match = CPSMatchLevel.MULTI_KEY
 
-        if self.voc_match(phrase, "shunned_house"):
+        title = self.clean_vocs(phrase, authors=True)
+
+        # TODO self.fuzzy_voc_match(title, "XXX")
+
+        if self.voc_match(title, "shunned_house"):
             score += 0.7
             story = "shunned_house"
             if match is not None:
                 match = CPSMatchLevel.MULTI_KEY
             else:
                 match = CPSMatchLevel.TITLE
-        elif self.voc_match(phrase, "thing") and \
+        elif self.voc_match(title, "thing") and \
                 self.voc_match(phrase, "doorstep"):
             score += 0.7
             story = "thing_doorstep"
@@ -132,23 +136,20 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
                 match = CPSMatchLevel.MULTI_KEY
             else:
                 match = CPSMatchLevel.TITLE
-        elif self.voc_match(phrase, "tomb"):
+        elif self.voc_match(title, "tomb"):
             score += 0.7
             story = "tomb"
             if match is not None:
                 match = CPSMatchLevel.MULTI_KEY
             else:
                 match = CPSMatchLevel.TITLE
-        elif self.voc_match(phrase, "virgin_finlay"):
+        elif self.voc_match(title, "virgin_finlay"):
             score += 0.7
             story = "virgin_finlay"
             if match is not None:
                 match = CPSMatchLevel.MULTI_KEY
             else:
                 match = CPSMatchLevel.TITLE
-        else:
-            # TODO fuzzy match story name
-            title = self.clean_vocs(phrase, authors=True)
 
         if score >= 0.9:
             match = CPSMatchLevel.EXACT
