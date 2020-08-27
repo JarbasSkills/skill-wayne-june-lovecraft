@@ -1,5 +1,5 @@
 from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel,\
-    CPSTrackStatus
+    CPSTrackStatus, CPSMatchType
 import pafy
 from tempfile import gettempdir
 import re
@@ -30,6 +30,8 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
             # audiobooks for the remaining stories however
             # Yet another lovecraft skill? this is why
         }
+        self.supported_media = [CPSMatchType.GENERIC,
+                                CPSMatchType.AUDIOBOOK]
 
     def initialize(self):
         self.add_event('skill-wayne-june-lovecraft.jarbasskills.home',
@@ -76,14 +78,15 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
         phrase = phrase.strip()
         return phrase
 
-    def CPS_match_query_phrase(self, phrase):
+    def CPS_match_query_phrase(self, phrase, media_type):
 
         original = phrase
         match = None
         score = 0
         story = random.choice(["shunned_house", "tomb", "thing_doorstep"])
 
-        if self.voc_match(original, "reading"):
+        if media_type == CPSMatchType.AUDIOBOOK or \
+                self.voc_match(original, "reading"):
             score += 0.1
             match = CPSMatchLevel.GENERIC
 
