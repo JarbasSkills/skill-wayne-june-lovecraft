@@ -92,7 +92,7 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
 
         if self.voc_match(phrase, "lovecraft"):
             score += 0.3
-            match = CPSMatchLevel.CATEGORY
+            match = CPSMatchLevel.ARTIST
 
         if self.voc_match(phrase, "wayne_june"):
             score += 0.3
