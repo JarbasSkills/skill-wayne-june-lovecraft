@@ -25,7 +25,10 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
             # these are likely to be taken down soon
             "shunned_house": "https://www.youtube.com/watch?v=77xxGopjMbY",
 
-            # TODO more streams
+            # TODO more streams, this guy is the best and has read
+            # nearly everything from lovecraft, can only find paid
+            # audiobooks for the remaining stories however
+            # Yet another lovecraft skill? this is why
         }
 
     def initialize(self):
