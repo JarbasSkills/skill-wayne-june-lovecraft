@@ -87,6 +87,7 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
         phrase = self.remove_voc(phrase, "reading")
         phrase = self.remove_voc(phrase, "audio_theatre")
         phrase = self.remove_voc(phrase, "play")
+        phrase = self.remove_voc(phrase, "comic")
         if authors:
             phrase = self.remove_voc(phrase, "lovecraft")
             phrase = self.remove_voc(phrase, "wayne_june")
