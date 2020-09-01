@@ -18,7 +18,8 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
             self.settings["audio_only"] = False
 
         self.lovecraft_stories = ["shunned_house", "tomb", "thing_doorstep"]
-        # TODO other authors
+        self.lovecraft_comics = ["rats_walls", "cthulhu"]
+        # TODO other authors read by wayne june
         self.stories = [] + self.lovecraft_stories
 
         self.urls = {
@@ -26,8 +27,13 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
             "tomb": "https://www.youtube.com/watch?v=6yIqQ2O-zws",
             "thing_doorstep": "https://www.youtube.com/watch?v=PicZATCo3h4",
             "virgin_finlay": "https://www.youtube.com/watch?v=zf_Il12Tgn8",
+
             # these are likely to be taken down soon
             "shunned_house": "https://www.youtube.com/watch?v=77xxGopjMbY",
+
+            "rats_walls": "https://www.youtube.com/watch?v=o0eDis-w-90",
+            "cthulhu": "https://www.youtube.com/watch?v=7RV6htNDTwI&t=1261s",
+
 
             # TODO more streams, this guy is the best and has read
             # nearly everything from lovecraft, can only find paid
@@ -35,6 +41,8 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
             # Yet another lovecraft skill? this is why
         }
         self.supported_media = [CPSMatchType.GENERIC,
+                                CPSMatchType.VIDEO,
+                                CPSMatchType.MOVIE,
                                 CPSMatchType.AUDIOBOOK]
 
     def initialize(self):
@@ -97,6 +105,14 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
             score += 0.1
             match = CPSMatchLevel.GENERIC
 
+        if media_type == CPSMatchType.VIDEO or \
+                media_type == CPSMatchType.MOVIE or \
+                self.voc_match(original, "comic"):
+            if media_type != CPSMatchType.MOVIE:
+                score += 0.1
+            match = CPSMatchLevel.GENERIC
+            story = random.choice(self.lovecraft_comics)
+
         if self.voc_match(original, "audio_theatre"):
             score += 0.1
             match = CPSMatchLevel.GENERIC
@@ -119,11 +135,18 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
 
         title = self.clean_vocs(phrase, authors=True)
 
-        # TODO self.fuzzy_voc_match(title, "XXX")
+        # TODO self.fuzzy_voc_match(title, "XXX", thresh=0.65)
 
         if self.voc_match(title, "shunned_house"):
             score += 0.7
             story = "shunned_house"
+            if match is not None:
+                match = CPSMatchLevel.MULTI_KEY
+            else:
+                match = CPSMatchLevel.TITLE
+        elif self.voc_match(title, "cthulhu"):
+            score += 0.7
+            story = "cthulhu"
             if match is not None:
                 match = CPSMatchLevel.MULTI_KEY
             else:
@@ -143,6 +166,13 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
                 match = CPSMatchLevel.MULTI_KEY
             else:
                 match = CPSMatchLevel.TITLE
+        elif self.voc_match(title, "rats") and self.voc_match(title, "walls"):
+            score += 0.7
+            story = "rats_walls"
+            if match is not None:
+                match = CPSMatchLevel.MULTI_KEY
+            else:
+                match = CPSMatchLevel.TITLE
         elif self.voc_match(title, "virgin_finlay"):
             score += 0.7
             story = "virgin_finlay"
@@ -154,20 +184,29 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
         if score >= 0.9:
             match = CPSMatchLevel.EXACT
 
+        url = self.urls[story]
+
         if match is not None:
-            url = self.urls[story]
             return (phrase, match,
                     {"query": original, "story": story, "url": url})
         return None
 
     def CPS_start(self, phrase, data):
-        url = self.get_audio_stream(data["url"],
-                                    self.settings["download_audio"])
-        self.audioservice.play(url, utterance=self.play_service_string)
-        self.CPS_send_status(uri=url,
-                             playlist_position=0,
-                             image=join(dirname(__file__), "ui", "logo.png"),
-                             status=CPSTrackStatus.PLAYING_AUDIOSERVICE)
+
+        if self.gui.connected and not self.settings["audio_only"]:
+            url = self.get_video_stream(data["url"])
+            self.CPS_send_status(uri=url,
+                                 playlist_position=0,
+                                 title=data["story"],
+                                 status=CPSTrackStatus.PLAYING_GUI)
+            self.gui.play_video(url, data["story"])
+        else:
+            url = self.get_audio_stream(data["url"], self.settings["download_audio"])
+            self.audioservice.play(url, utterance=self.play_service_string)
+            self.CPS_send_status(uri=url,
+                                 playlist_position=0,
+                                 title=data["story"],
+                                 status=CPSTrackStatus.PLAYING_AUDIOSERVICE)
 
     # youtube handling
     @staticmethod
@@ -192,6 +231,11 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
                 subprocess.call(command)
 
             return mp3
+        return stream.url
+
+    @staticmethod
+    def get_video_stream(url):
+        stream = pafy.new(url).getbest()
         return stream.url
 
 
