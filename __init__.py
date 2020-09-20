@@ -20,7 +20,7 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
         self.lovecraft_stories = ["shunned_house", "tomb", "thing_doorstep"]
         self.lovecraft_comics = ["rats_walls", "cthulhu"]
         # TODO other authors read by wayne june
-        self.stories = [] + self.lovecraft_stories
+        self.stories = self.lovecraft_stories + self.lovecraft_comics
 
         self.urls = {
             # these 3 are in official account
@@ -43,6 +43,7 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
         self.supported_media = [CPSMatchType.GENERIC,
                                 CPSMatchType.VIDEO,
                                 CPSMatchType.MOVIE,
+                                CPSMatchType.VISUAL_STORY,
                                 CPSMatchType.AUDIOBOOK]
 
     def initialize(self):
@@ -64,7 +65,7 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
     # homescreen
     def handle_homescreen(self, message):
         # TODO selection menu
-        story = random.choice(["shunned_house", "tomb", "thing_doorstep"])
+        story = random.choice(self.lovecraft_stories)
         self.CPS_start("wayne june lovecraft", {"url": self.urls[story]})
 
     # common play
@@ -99,10 +100,12 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
         original = phrase
         match = None
         score = 0
-        story = random.choice(self.stories)
+        story = None
+        options = self.stories
 
         if media_type == CPSMatchType.AUDIOBOOK or \
-                self.voc_match(original, "reading"):
+                self.voc_match(original, "reading") or \
+                self.voc_match(original, "audio_theatre"):
             score += 0.1
             match = CPSMatchLevel.GENERIC
 
@@ -112,18 +115,22 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
             if media_type != CPSMatchType.MOVIE:
                 score += 0.1
             match = CPSMatchLevel.GENERIC
-            story = random.choice(self.lovecraft_comics)
+            options = self.lovecraft_stories
 
-        if self.voc_match(original, "audio_theatre"):
-            score += 0.1
-            match = CPSMatchLevel.GENERIC
+        if media_type == CPSMatchType.VISUAL_STORY:
+            score += 0.2
+            match = CPSMatchLevel.CATEGORY
+            options = self.lovecraft_comics
 
         phrase = self.clean_vocs(phrase)
 
         if self.voc_match(phrase, "lovecraft"):
             score += 0.3
             match = CPSMatchLevel.ARTIST
-            story = random.choice(self.lovecraft_stories)
+            if media_type == CPSMatchType.VISUAL_STORY:
+                options = self.lovecraft_comics
+            else:
+                options = self.lovecraft_stories
 
         # TODO readings of other authors by wayne june
 
@@ -185,6 +192,7 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
         if score >= 0.9:
             match = CPSMatchLevel.EXACT
 
+        story = story or random.choice(options)
         url = self.urls[story]
 
         if match is not None:
