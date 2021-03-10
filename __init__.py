@@ -1,5 +1,5 @@
-from mycroft.skills.common_play_skill import CommonPlaySkill, CPSMatchLevel,\
-    CPSTrackStatus
+from ovos_utils.skills.templates.common_play import BetterCommonPlaySkill
+from ovos_utils.playback import CPSMatchType, CPSPlayback, CPSMatchConfidence
 import pafy
 from tempfile import gettempdir
 import re
@@ -8,66 +8,73 @@ from os.path import join, dirname, exists
 import random
 
 
-class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
+class WayneJuneLovecraftReadingsSkill(BetterCommonPlaySkill):
 
     def __init__(self):
         super().__init__("Wayne June Lovecraft Readings")
-        if "download_audio" not in self.settings:
-            self.settings["download_audio"] = True
-        if "audio_only" not in self.settings:
-            self.settings["audio_only"] = False
+        self.supported_media = [CPSMatchType.GENERIC,
+                                CPSMatchType.AUDIOBOOK,
+                                CPSMatchType.VISUAL_STORY,
+                                CPSMatchType.VIDEO]
+        self.default_image = join(dirname(__file__), "ui", "wayne_june.png")
+        self.skill_logo = join(dirname(__file__), "ui", "logo.png")
+        self.skill_icon = join(dirname(__file__), "ui", "icon.png")
+        self.default_bg = join(dirname(__file__), "ui", "bg.jpeg")
+        # TODO use media collection skill template instead
         self.urls = {
             # these 3 are in official account
-            "tomb": "https://www.youtube.com/watch?v=6yIqQ2O-zws",
-            "thing_doorstep": "https://www.youtube.com/watch?v=PicZATCo3h4",
-            "virgin_finlay": "https://www.youtube.com/watch?v=zf_Il12Tgn8",
+            "The Tomb": "https://www.youtube.com/watch?v=6yIqQ2O-zws",
+        #    "To Virgil Finlay": "https://www.youtube.com/watch?v=zf_Il12Tgn8",
+            # NOTE provided below, the other link does not need to extract
+            # the real stream and is prefered
+            # "The Thing On The Doorstep": "https://www.youtube.com/watch?v=PicZATCo3h4",
 
             # these are likely to be taken down soon
-            "shunned_house": "https://www.youtube.com/watch?v=77xxGopjMbY",
+            "The Shunned House": "https://www.youtube.com/watch?v=77xxGopjMbY",
+
+            # these were removed from youtube but backed up, might also disappear
+            "The Horror At Red Hook": "https://archive.org/download/youtube-rMhYkkaR8HU/H.P._Lovecraft_-_The_Horror_At_Red_Hook_-_Wayne_June-rMhYkkaR8HU.mp4",
+            "The Shadow Over Innsmouth": "https://archive.org/download/youtube-aFZrqYn5f_0/H.P._Lovecraft_-_The_Shadow_Over_Innsmouth_-_Wayne_June-aFZrqYn5f_0.mp4",
+            "Herbert West–Reanimator": "https://archive.org/download/youtube-GfHClVEPcjU/H.P._Lovecraft_-_Herbert_West_Reanimator_-_Wayne_June-GfHClVEPcjU.mp4",
+            "The Lurking Fear": "https://archive.org/download/youtube--CZZo_y3TB8/H.P._LOVECRAFT_-_The_Lurking_Fear_-_Wayne_June--CZZo_y3TB8.mp4",
+            "The Call Of Cthulhu": "https://archive.org/download/youtube-EHGj5M8WIAQ/THE_CALL_OF_CTHULHU_-_H.P._LOVECRAFT_-_Wayne_June-EHGj5M8WIAQ.mp4",
+            "The Dunwich Horror": "https://archive.org/download/youtube-OL8iuoZqX_U/H.P._Lovecraft_-_The_Dunwich_Horror_-_Wayne_June-OL8iuoZqX_U.mp4",
+            "The Thing On The Doorstep": "https://archive.org/download/youtube-gHLEGzu8Dw8/H.P._Lovecraft_-_The_Thing_On_The_Doorstep_-_Wayne_June-gHLEGzu8Dw8.mp4",
 
             # TODO more streams, this guy is the best and has read
             # nearly everything from lovecraft, can only find paid
-            # audiobooks for the remaining stories however
-            # Yet another lovecraft skill? this is why
+            # audiobooks for the remaining stories
+        }
+        self.durations = {
+            "The Tomb": 28 * 60 + 58,  # 28:58
+          #  "To Virgil Finlay": 1 * 60 + 26,  # 1:26
+            "The Shunned House": 1 * 3600 + 18 * 60 + 24,  # 1:18:24
+            "The Horror At Red Hook": 1 * 3600 + 4 * 60 + 22,  # 1:04:22
+            "The Shadow Over Innsmouth": 2 * 3600 + 53 * 60 + 22,  # 2:53:22
+            "Herbert West–Reanimator": 1 * 3600 + 30 * 60 + 47,  # 1:30:47
+            "The Lurking Fear": 1 * 3600 + 2 * 60 + 6,  # 1:02:06
+            "The Call Of Cthulhu": 1 * 3600 + 19 * 60 + 20,  # 1:19:20
+            "The Dunwich Horror": 1 * 3600 + 51 * 60 + 30, # 1:51:30
+            "The Thing On The Doorstep": 1 * 3600 + 17 * 60 + 49,  # 1:17:49
+        }
+        self.pictures = {
+            "The Tomb": join(dirname(__file__), "ui", "tomb.jpeg"),
+           # "To Virgil Finlay": self.default_image,
+            "The Shunned House": join(dirname(__file__), "ui", "shunned_house.jpeg"),
+            "The Horror At Red Hook": join(dirname(__file__), "ui", "red_hook.jpeg"),
+            "The Shadow Over Innsmouth": join(dirname(__file__), "ui", "innsmouth.jpeg"),
+            "Herbert West–Reanimator": join(dirname(__file__), "ui", "herbertwest.png"),
+            "The Lurking Fear": join(dirname(__file__), "ui", "lurking.jpeg"),
+            "The Call Of Cthulhu": join(dirname(__file__), "ui", "call.jpeg"),
+            "The Dunwich Horror":join(dirname(__file__), "ui", "dunwich.jpeg"),
+            "The Thing On The Doorstep": join(dirname(__file__), "ui", "thing.png"),
         }
 
-    def initialize(self):
-        self.add_event('skill-wayne-june-lovecraft.jarbasskills.home',
-                       self.handle_homescreen)
 
-        # speed up playback, download + convert in advance
-        if self.settings["download_audio"]:
-            for story in self.urls:
-                try:
-                    self.get_audio_stream(self.urls[story], True)
-                except:
-                    pass
 
     def get_intro_message(self):
         self.speak_dialog("intro")
-        self.gui.show_image(join(dirname(__file__), "ui", "logo.png"))
-
-    # homescreen
-    def handle_homescreen(self, message):
-        # TODO selection menu
-        story = random.choice(["shunned_house", "tomb", "thing_doorstep"])
-        self.CPS_start("wayne june lovecraft", {"url": self.urls[story]})
-
-    # common play
-    def remove_voc(self, utt, voc_filename, lang=None):
-        lang = lang or self.lang
-        cache_key = lang + voc_filename
-
-        if cache_key not in self.voc_match_cache:
-            self.voc_match(utt, voc_filename, lang)
-
-        if utt:
-            # Check for matches against complete words
-            for i in self.voc_match_cache[cache_key]:
-                # Substitute only whole words matching the token
-                utt = re.sub(r'\b' + i + r"\b", "", utt)
-
-        return utt
+        self.gui.show_image(self.default_image)
 
     def clean_vocs(self, phrase):
         phrase = self.remove_voc(phrase, "reading")
@@ -76,106 +83,136 @@ class WayneJuneLovecraftReadingsSkill(CommonPlaySkill):
         phrase = phrase.strip()
         return phrase
 
-    def CPS_match_query_phrase(self, phrase):
+    # better common play
+    def CPS_search(self, phrase, media_type):
+        """Analyze phrase to see if it is a play-able phrase with this skill.
 
+        Arguments:
+            phrase (str): User phrase uttered after "Play", e.g. "some music"
+            media_type (CPSMatchType): requested CPSMatchType to search for
+
+        Returns:
+            search_results (list): list of dictionaries with result entries
+            {
+                "match_confidence": CPSMatchConfidence.HIGH,
+                "media_type":  CPSMatchType.MUSIC,
+                "uri": "https://audioservice.or.gui.will.play.this",
+                "playback": CPSPlayback.GUI,
+                "image": "http://optional.audioservice.jpg",
+                "bg_image": "http://optional.audioservice.background.jpg"
+            }
+        """
         original = phrase
-        match = None
         score = 0
-        story = random.choice(["shunned_house", "tomb", "thing_doorstep"])
+
+        # calculate a base score for media type + author
+        if media_type == CPSMatchType.AUDIOBOOK:
+            score += 10
 
         if self.voc_match(original, "reading"):
-            score += 0.1
-            match = CPSMatchLevel.GENERIC
+            score += 10
 
         if self.voc_match(original, "audio_theatre"):
-            score += 0.1
-            match = CPSMatchLevel.GENERIC
+            score += 10
 
         phrase = self.clean_vocs(phrase)
 
         if self.voc_match(phrase, "lovecraft"):
-            score += 0.3
-            match = CPSMatchLevel.ARTIST
+            score += 30
 
         if self.voc_match(phrase, "wayne_june"):
-            score += 0.3
-            match = CPSMatchLevel.ARTIST
+            score += 35
             if self.voc_match(phrase, "lovecraft"):
-                score += 0.1
-                match = CPSMatchLevel.MULTI_KEY
+                score += 10
 
-        if self.voc_match(phrase, "shunned_house"):
-            score += 0.7
-            story = "shunned_house"
-            if match is not None:
-                match = CPSMatchLevel.MULTI_KEY
-            else:
-                match = CPSMatchLevel.TITLE
-        elif self.voc_match(phrase, "thing") and \
+        if self.voc_match(phrase, "horror"):
+            score += 10
+        if self.voc_match(phrase, "cthulhu"):
+            score += 10
+
+        # calculate scores for individual stories
+        # NOTE: each match is designed to be 70 for exact match,
+        # the other 30 are reserved for author/media type
+        # NOTE2: all my lovecraft skills are designed to return confidence
+        # of 40 if the query only contains the author, this is important to
+        # ensure all stories are equal without extra information
+        scores = {}
+        for k in self.urls:
+            scores[k] = score
+
+        if self.voc_match(phrase, "horror"):
+            scores["The Horror At Red Hook"] += 10
+            scores["The Dunwich Horror"] += 10
+
+        if self.voc_match(phrase, "red_hook"):
+            scores["The Horror At Red Hook"] += 40
+            if self.voc_match(phrase, "horror"):
+                scores["The Horror At Red Hook"] += 20
+
+        if self.voc_match(phrase, "dunwich"):
+            scores["The Dunwich Horror"] += 40
+            if self.voc_match(phrase, "horror"):
+                scores["The Dunwich Horror"] += 20
+
+        if self.voc_match(phrase, "lurking_fear"):
+            scores["The Lurking Fear"] += 70
+
+        if self.voc_match(phrase, "tomb"):
+            scores["The Tomb"] += 70
+      #  if self.voc_match(phrase, "virgin_finlay"):
+      #      scores["To Virgil Finlay"] += 70
+
+        if self.voc_match(phrase, "reanimator"):
+            scores["Herbert West–Reanimator"] += 40
+            if self.voc_match(phrase, "herbert_west"):
+                scores["Herbert West–Reanimator"] += 30
+
+        if self.voc_match(phrase, "innsmouth"):
+            scores["The Shadow Over Innsmouth"] += 40
+            if self.voc_match(phrase, "shadow"):
+                scores["The Shadow Over Innsmouth"] += 30
+
+        if self.voc_match(phrase, "cthulhu"):
+            scores["The Call Of Cthulhu"] += 40
+            if self.voc_match(phrase, "call"):
+                scores["The Call Of Cthulhu"] += 20
+
+        if self.voc_match(phrase, "doorstep"):
+            scores["The Thing On The Doorstep"] += 10
+        if self.voc_match(phrase, "thing"):
+            scores["The Thing On The Doorstep"] += 10
+        if self.voc_match(phrase, "thing") and \
                 self.voc_match(phrase, "doorstep"):
-            score += 0.7
-            story = "thing_doorstep"
-            if match is not None:
-                match = CPSMatchLevel.MULTI_KEY
-            else:
-                match = CPSMatchLevel.TITLE
-        elif self.voc_match(phrase, "tomb"):
-            score += 0.7
-            story = "tomb"
-            if match is not None:
-                match = CPSMatchLevel.MULTI_KEY
-            else:
-                match = CPSMatchLevel.TITLE
-        elif self.voc_match(phrase, "virgin_finlay"):
-            score += 0.7
-            story = "virgin_finlay"
-            if match is not None:
-                match = CPSMatchLevel.MULTI_KEY
-            else:
-                match = CPSMatchLevel.TITLE
+            scores["The Thing On The Doorstep"] += 50
 
-        if score >= 0.9:
-            match = CPSMatchLevel.EXACT
+        if self.voc_match(phrase, "house"):
+            scores["The Shunned House"] += 10
+        if self.voc_match(phrase, "shunned"):
+            scores["The Shunned House"] += 10
+        if self.voc_match(phrase, "shunned") and \
+                self.voc_match(phrase, "house"):
+            scores["The Shunned House"] += 50
 
-        if match is not None:
-            url = self.urls[story]
-            return (phrase, match,
-                    {"query": original, "story": story, "url": url})
+        matches = []
+        for k, v in scores.items():
+            if v >= CPSMatchConfidence.AVERAGE_LOW:
+                matches.append({
+                    "match_confidence": min(100, v),
+                    "media_type": CPSMatchType.AUDIOBOOK,
+                    "uri": self.urls[k],
+                    "playback": CPSPlayback.AUDIO,
+                    "image": self.pictures[k],
+                    "bg_image": self.default_bg,
+                    "skill_icon": self.skill_icon,
+                    "skill_logo": self.skill_logo,
+                    "length": self.durations[k] * 1000,
+                    "title": k,
+                    "author": "H. P. Lovecraft",
+                    "album": "read by Wayne June"
+                })
+        if matches:
+            return matches
         return None
-
-    def CPS_start(self, phrase, data):
-        url = self.get_audio_stream(data["url"],
-                                    self.settings["download_audio"])
-        self.audioservice.play(url, utterance=self.play_service_string)
-        self.CPS_send_status(uri=url,
-                             playlist_position=0,
-                             image=join(dirname(__file__), "ui", "logo.png"),
-                             status=CPSTrackStatus.PLAYING_AUDIOSERVICE)
-
-    # youtube handling
-    @staticmethod
-    def get_audio_stream(url, download=False):
-        stream = pafy.new(url).getbestaudio()
-
-        # TODO check if https supported by audioservice
-        # if not set download=True without needing user changing settings.json
-        if download:
-            path = join(gettempdir(),
-                        url.split("watch?v=")[-1] + "." + stream.extension)
-            mp3 = join(gettempdir(), url.split("watch?v=")[-1] + ".mp3")
-
-            if not exists(mp3) and not exists(path):
-                stream.download(path)
-
-            if not exists(mp3):
-                # convert file to allow playback with simple audio backend
-                command = ["ffmpeg", "-n", "-i", path, "-acodec",
-                           "libmp3lame",
-                           "-ab", "128k", mp3]
-                subprocess.call(command)
-
-            return mp3
-        return stream.url
 
 
 def create_skill():
