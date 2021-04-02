@@ -1,5 +1,6 @@
-from ovos_utils.skills.templates.common_play import BetterCommonPlaySkill
-from ovos_utils.playback import CPSMatchType, CPSPlayback, CPSMatchConfidence
+from ovos_workshop.skills.common_play import BetterCommonPlaySkill
+from ovos_workshop.frameworks.cps import CPSMatchType, CPSPlayback, \
+    CPSMatchConfidence
 import pafy
 from tempfile import gettempdir
 import re
