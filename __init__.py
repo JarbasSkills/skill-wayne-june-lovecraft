@@ -1,5 +1,6 @@
-from ovos_utils.skills.templates.common_play import BetterCommonPlaySkill
-from ovos_utils.playback import CPSMatchType, CPSPlayback, CPSMatchConfidence
+from ovos_workshop.skills.common_play import OVOSCommonPlaybackSkill
+from ovos_workshop.frameworks.playback import CPSMatchType, CPSPlayback, \
+    CPSMatchConfidence
 import pafy
 from tempfile import gettempdir
 import re
@@ -8,7 +9,7 @@ from os.path import join, dirname, exists
 import random
 
 
-class WayneJuneLovecraftReadingsSkill(BetterCommonPlaySkill):
+class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
 
     def __init__(self):
         super().__init__("Wayne June Lovecraft Readings")
