@@ -71,8 +71,6 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
             "The Thing On The Doorstep": join(dirname(__file__), "ui", "thing.png"),
         }
 
-
-
     def get_intro_message(self):
         self.speak_dialog("intro")
         self.gui.show_image(self.default_image)
@@ -119,7 +117,7 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
         phrase = self.clean_vocs(phrase)
 
         if self.voc_match(phrase, "lovecraft"):
-            score += 30
+            score += 50
 
         if self.voc_match(phrase, "wayne_june"):
             score += 35
@@ -194,10 +192,9 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
                 self.voc_match(phrase, "house"):
             scores["The Shunned House"] += 50
 
-        matches = []
         for k, v in scores.items():
             if v >= CommonPlayMatchConfidence.AVERAGE_LOW:
-                matches.append({
+                yield {
                     "match_confidence": min(100, v),
                     "media_type": CommonPlayMediaType.AUDIOBOOK,
                     "uri": self.urls[k],
@@ -210,10 +207,7 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
                     "title": k,
                     "author": "H. P. Lovecraft",
                     "album": "read by Wayne June"
-                })
-        if matches:
-            return matches
-        return None
+                }
 
 
 def create_skill():
