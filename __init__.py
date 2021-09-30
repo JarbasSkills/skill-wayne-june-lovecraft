@@ -1,22 +1,17 @@
 from ovos_workshop.skills.common_play import OVOSCommonPlaybackSkill
-from ovos_workshop.frameworks.playback import CommonPlayMediaType, CommonPlayPlaybackType, \
-    CommonPlayMatchConfidence
-import pafy
-from tempfile import gettempdir
-import re
-import subprocess
-from os.path import join, dirname, exists
-import random
+from ovos_plugin_common_play.ocp import MediaType, PlaybackType, \
+    MatchConfidence
+from os.path import join, dirname
 
 
 class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
 
     def __init__(self):
         super().__init__("Wayne June Lovecraft Readings")
-        self.supported_media = [CommonPlayMediaType.GENERIC,
-                                CommonPlayMediaType.AUDIOBOOK,
-                                CommonPlayMediaType.VISUAL_STORY,
-                                CommonPlayMediaType.VIDEO]
+        self.supported_media = [MediaType.GENERIC,
+                                MediaType.AUDIOBOOK,
+                                MediaType.VISUAL_STORY,
+                                MediaType.VIDEO]
         self.default_image = join(dirname(__file__), "ui", "wayne_june.png")
         self.skill_logo = join(dirname(__file__), "ui", "logo.png")
         self.skill_icon = join(dirname(__file__), "ui", "icon.png")
@@ -88,15 +83,15 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
 
         Arguments:
             phrase (str): User phrase uttered after "Play", e.g. "some music"
-            media_type (CommonPlayMediaType): requested CPSMatchType to search for
+            media_type (MediaType): requested CPSMatchType to media for
 
         Returns:
             search_results (list): list of dictionaries with result entries
             {
-                "match_confidence": CommonPlayMatchConfidence.HIGH,
+                "match_confidence": MatchConfidence.HIGH,
                 "media_type":  CPSMatchType.MUSIC,
                 "uri": "https://audioservice.or.gui.will.play.this",
-                "playback": CommonPlayPlaybackType.VIDEO,
+                "playback": PlaybackType.VIDEO,
                 "image": "http://optional.audioservice.jpg",
                 "bg_image": "http://optional.audioservice.background.jpg"
             }
@@ -105,7 +100,7 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
         score = 0
 
         # calculate a base score for media type + author
-        if media_type == CommonPlayMediaType.AUDIOBOOK:
+        if media_type == MediaType.AUDIOBOOK:
             score += 10
 
         if self.voc_match(original, "reading"):
@@ -193,12 +188,12 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
             scores["The Shunned House"] += 50
 
         for k, v in scores.items():
-            if v >= CommonPlayMatchConfidence.AVERAGE_LOW:
+            if v >= MatchConfidence.AVERAGE_LOW:
                 yield {
                     "match_confidence": min(100, v),
-                    "media_type": CommonPlayMediaType.AUDIOBOOK,
+                    "media_type": MediaType.AUDIOBOOK,
                     "uri": self.urls[k],
-                    "playback": CommonPlayPlaybackType.AUDIO,
+                    "playback": PlaybackType.AUDIO,
                     "image": self.pictures[k],
                     "bg_image": self.default_bg,
                     "skill_icon": self.skill_icon,
