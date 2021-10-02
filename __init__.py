@@ -1,7 +1,8 @@
-from ovos_workshop.skills.common_play import OVOSCommonPlaybackSkill
-from ovos_plugin_common_play.ocp import MediaType, PlaybackType, \
-    MatchConfidence
 from os.path import join, dirname
+
+from ovos_workshop.skills.common_play import OVOSCommonPlaybackSkill, \
+    MediaType, PlaybackType, \
+    MatchConfidence, ocp_search
 
 
 class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
@@ -20,7 +21,7 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
         self.urls = {
             # these 3 are in official account
             "The Tomb": "https://www.youtube.com/watch?v=6yIqQ2O-zws",
-        #    "To Virgil Finlay": "https://www.youtube.com/watch?v=zf_Il12Tgn8",
+            #    "To Virgil Finlay": "https://www.youtube.com/watch?v=zf_Il12Tgn8",
             # NOTE provided below, the other link does not need to extract
             # the real stream and is prefered
             # "The Thing On The Doorstep": "https://www.youtube.com/watch?v=PicZATCo3h4",
@@ -43,27 +44,33 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
         }
         self.durations = {
             "The Tomb": 28 * 60 + 58,  # 28:58
-          #  "To Virgil Finlay": 1 * 60 + 26,  # 1:26
+            #  "To Virgil Finlay": 1 * 60 + 26,  # 1:26
             "The Shunned House": 1 * 3600 + 18 * 60 + 24,  # 1:18:24
             "The Horror At Red Hook": 1 * 3600 + 4 * 60 + 22,  # 1:04:22
             "The Shadow Over Innsmouth": 2 * 3600 + 53 * 60 + 22,  # 2:53:22
             "Herbert West–Reanimator": 1 * 3600 + 30 * 60 + 47,  # 1:30:47
             "The Lurking Fear": 1 * 3600 + 2 * 60 + 6,  # 1:02:06
             "The Call Of Cthulhu": 1 * 3600 + 19 * 60 + 20,  # 1:19:20
-            "The Dunwich Horror": 1 * 3600 + 51 * 60 + 30, # 1:51:30
+            "The Dunwich Horror": 1 * 3600 + 51 * 60 + 30,  # 1:51:30
             "The Thing On The Doorstep": 1 * 3600 + 17 * 60 + 49,  # 1:17:49
         }
         self.pictures = {
             "The Tomb": join(dirname(__file__), "ui", "tomb.jpeg"),
-           # "To Virgil Finlay": self.default_image,
-            "The Shunned House": join(dirname(__file__), "ui", "shunned_house.jpeg"),
-            "The Horror At Red Hook": join(dirname(__file__), "ui", "red_hook.jpeg"),
-            "The Shadow Over Innsmouth": join(dirname(__file__), "ui", "innsmouth.jpeg"),
-            "Herbert West–Reanimator": join(dirname(__file__), "ui", "herbertwest.png"),
+            # "To Virgil Finlay": self.default_image,
+            "The Shunned House": join(dirname(__file__), "ui",
+                                      "shunned_house.jpeg"),
+            "The Horror At Red Hook": join(dirname(__file__), "ui",
+                                           "red_hook.jpeg"),
+            "The Shadow Over Innsmouth": join(dirname(__file__), "ui",
+                                              "innsmouth.jpeg"),
+            "Herbert West–Reanimator": join(dirname(__file__), "ui",
+                                            "herbertwest.png"),
             "The Lurking Fear": join(dirname(__file__), "ui", "lurking.jpeg"),
             "The Call Of Cthulhu": join(dirname(__file__), "ui", "call.jpeg"),
-            "The Dunwich Horror":join(dirname(__file__), "ui", "dunwich.jpeg"),
-            "The Thing On The Doorstep": join(dirname(__file__), "ui", "thing.png"),
+            "The Dunwich Horror": join(dirname(__file__), "ui",
+                                       "dunwich.jpeg"),
+            "The Thing On The Doorstep": join(dirname(__file__), "ui",
+                                              "thing.png"),
         }
 
     def get_intro_message(self):
@@ -77,8 +84,8 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
         phrase = phrase.strip()
         return phrase
 
-    # better common play
-    def CPS_search(self, phrase, media_type):
+    @ocp_search()
+    def search(self, phrase, media_type):
         """Analyze phrase to see if it is a play-able phrase with this skill.
 
         Arguments:
@@ -153,8 +160,8 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
 
         if self.voc_match(phrase, "tomb"):
             scores["The Tomb"] += 70
-      #  if self.voc_match(phrase, "virgin_finlay"):
-      #      scores["To Virgil Finlay"] += 70
+        #  if self.voc_match(phrase, "virgin_finlay"):
+        #      scores["To Virgil Finlay"] += 70
 
         if self.voc_match(phrase, "reanimator"):
             scores["Herbert West–Reanimator"] += 40
