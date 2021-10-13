@@ -1,8 +1,8 @@
 from os.path import join, dirname
+from json_database import JsonStorage
 
 from ovos_workshop.skills.common_play import OVOSCommonPlaybackSkill, \
-    MediaType, PlaybackType, \
-    MatchConfidence, ocp_search
+    MediaType, PlaybackType, MatchConfidence, ocp_search
 
 
 class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
@@ -14,68 +14,65 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
                                 MediaType.VISUAL_STORY,
                                 MediaType.VIDEO]
         self.default_image = join(dirname(__file__), "ui", "wayne_june.png")
-        self.skill_logo = join(dirname(__file__), "ui", "logo.png")
         self.skill_icon = join(dirname(__file__), "ui", "icon.png")
         self.default_bg = join(dirname(__file__), "ui", "bg.jpeg")
-        # TODO use media collection skill template instead
-        self.urls = {
-            # these 3 are in official account
-            "The Tomb": "https://www.youtube.com/watch?v=6yIqQ2O-zws",
-            #    "To Virgil Finlay": "https://www.youtube.com/watch?v=zf_Il12Tgn8",
-            # NOTE provided below, the other link does not need to extract
-            # the real stream and is prefered
-            # "The Thing On The Doorstep": "https://www.youtube.com/watch?v=PicZATCo3h4",
+        self.db = JsonStorage(join(dirname(__file__), "res", "waynejune.json"))
 
-            # these are likely to be taken down soon
-            "The Shunned House": "https://www.youtube.com/watch?v=77xxGopjMbY",
+    def get_base_score(self, phrase):
+        score = 0
+        if self.voc_match(phrase, "reading"):
+            score += 10
 
-            # these were removed from youtube but backed up, might also disappear
-            "The Horror At Red Hook": "https://archive.org/download/youtube-rMhYkkaR8HU/H.P._Lovecraft_-_The_Horror_At_Red_Hook_-_Wayne_June-rMhYkkaR8HU.mp4",
-            "The Shadow Over Innsmouth": "https://archive.org/download/youtube-aFZrqYn5f_0/H.P._Lovecraft_-_The_Shadow_Over_Innsmouth_-_Wayne_June-aFZrqYn5f_0.mp4",
-            "Herbert West–Reanimator": "https://archive.org/download/youtube-GfHClVEPcjU/H.P._Lovecraft_-_Herbert_West_Reanimator_-_Wayne_June-GfHClVEPcjU.mp4",
-            "The Lurking Fear": "https://archive.org/download/youtube--CZZo_y3TB8/H.P._LOVECRAFT_-_The_Lurking_Fear_-_Wayne_June--CZZo_y3TB8.mp4",
-            "The Call Of Cthulhu": "https://archive.org/download/youtube-EHGj5M8WIAQ/THE_CALL_OF_CTHULHU_-_H.P._LOVECRAFT_-_Wayne_June-EHGj5M8WIAQ.mp4",
-            "The Dunwich Horror": "https://archive.org/download/youtube-OL8iuoZqX_U/H.P._Lovecraft_-_The_Dunwich_Horror_-_Wayne_June-OL8iuoZqX_U.mp4",
-            "The Thing On The Doorstep": "https://archive.org/download/youtube-gHLEGzu8Dw8/H.P._Lovecraft_-_The_Thing_On_The_Doorstep_-_Wayne_June-gHLEGzu8Dw8.mp4",
+        if self.voc_match(phrase, "audio_theatre"):
+            score += 10
 
-            # TODO more streams, this guy is the best and has read
-            # nearly everything from lovecraft, can only find paid
-            # audiobooks for the remaining stories
-        }
-        self.durations = {
-            "The Tomb": 28 * 60 + 58,  # 28:58
-            #  "To Virgil Finlay": 1 * 60 + 26,  # 1:26
-            "The Shunned House": 1 * 3600 + 18 * 60 + 24,  # 1:18:24
-            "The Horror At Red Hook": 1 * 3600 + 4 * 60 + 22,  # 1:04:22
-            "The Shadow Over Innsmouth": 2 * 3600 + 53 * 60 + 22,  # 2:53:22
-            "Herbert West–Reanimator": 1 * 3600 + 30 * 60 + 47,  # 1:30:47
-            "The Lurking Fear": 1 * 3600 + 2 * 60 + 6,  # 1:02:06
-            "The Call Of Cthulhu": 1 * 3600 + 19 * 60 + 20,  # 1:19:20
-            "The Dunwich Horror": 1 * 3600 + 51 * 60 + 30,  # 1:51:30
-            "The Thing On The Doorstep": 1 * 3600 + 17 * 60 + 49,  # 1:17:49
-        }
-        self.pictures = {
-            "The Tomb": join(dirname(__file__), "ui", "tomb.jpeg"),
-            # "To Virgil Finlay": self.default_image,
-            "The Shunned House": join(dirname(__file__), "ui",
-                                      "shunned_house.jpeg"),
-            "The Horror At Red Hook": join(dirname(__file__), "ui",
-                                           "red_hook.jpeg"),
-            "The Shadow Over Innsmouth": join(dirname(__file__), "ui",
-                                              "innsmouth.jpeg"),
-            "Herbert West–Reanimator": join(dirname(__file__), "ui",
-                                            "herbertwest.png"),
-            "The Lurking Fear": join(dirname(__file__), "ui", "lurking.jpeg"),
-            "The Call Of Cthulhu": join(dirname(__file__), "ui", "call.jpeg"),
-            "The Dunwich Horror": join(dirname(__file__), "ui",
-                                       "dunwich.jpeg"),
-            "The Thing On The Doorstep": join(dirname(__file__), "ui",
-                                              "thing.png"),
-        }
+        if self.voc_match(phrase, "lovecraft"):
+            score += 50
 
-    def get_intro_message(self):
-        self.speak_dialog("intro")
-        self.gui.show_image(self.default_image)
+        if self.voc_match(phrase, "wayne_june"):
+            score += 35
+            if self.voc_match(phrase, "lovecraft"):
+                score += 10
+
+        if self.voc_match(phrase, "horror"):
+            score += 10
+        if self.voc_match(phrase, "cthulhu"):
+            score += 10
+        return score
+
+    @ocp_search()
+    def ocp_waynejune_lovecraft_playlist(self, phrase):
+        score = self.get_base_score(phrase)
+        if self.voc_match(phrase, "wayne_june"):
+            score += 50
+        pl = [
+            {
+                "match_confidence": score,
+                "media_type": MediaType.AUDIOBOOK,
+                "uri": entry["uri"],
+                "playback": PlaybackType.AUDIO,
+                "image": join(dirname(__file__), entry["image"]),
+                "bg_image": self.default_bg,
+                "skill_icon": self.skill_icon,
+                "length": entry["length"],
+                "title": title,
+                "author": "H. P. Lovecraft",
+                "album": "read by Wayne June"
+            } for title, entry in self.db.items()
+        ]
+        if pl:
+            yield {
+                "match_confidence": score,
+                "media_type": MediaType.AUDIOBOOK,
+                "playlist": pl,
+                "playback": PlaybackType.AUDIO,
+                "skill_icon": self.skill_icon,
+                "image": self.default_bg,
+                "bg_image": self.default_bg,
+                "title": "Lovecraft - read by Wayne June (Compilation Playlist)",
+                "author": "H. P. Lovecraft",
+                "album": "read by Wayne June"
+            }
 
     def clean_vocs(self, phrase):
         phrase = self.remove_voc(phrase, "reading")
@@ -103,33 +100,11 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
                 "bg_image": "http://optional.audioservice.background.jpg"
             }
         """
-        original = phrase
-        score = 0
-
-        # calculate a base score for media type + author
-        if media_type == MediaType.AUDIOBOOK:
-            score += 10
-
-        if self.voc_match(original, "reading"):
-            score += 10
-
-        if self.voc_match(original, "audio_theatre"):
-            score += 10
+        score = self.get_base_score(phrase)
+        if media_type != MediaType.AUDIOBOOK:
+            score -= 20
 
         phrase = self.clean_vocs(phrase)
-
-        if self.voc_match(phrase, "lovecraft"):
-            score += 50
-
-        if self.voc_match(phrase, "wayne_june"):
-            score += 35
-            if self.voc_match(phrase, "lovecraft"):
-                score += 10
-
-        if self.voc_match(phrase, "horror"):
-            score += 10
-        if self.voc_match(phrase, "cthulhu"):
-            score += 10
 
         # calculate scores for individual stories
         # NOTE: each match is designed to be 70 for exact match,
@@ -138,7 +113,7 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
         # of 40 if the query only contains the author, this is important to
         # ensure all stories are equal without extra information
         scores = {}
-        for k in self.urls:
+        for k in self.db:
             scores[k] = score
 
         if self.voc_match(phrase, "horror"):
@@ -157,6 +132,9 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
 
         if self.voc_match(phrase, "lurking_fear"):
             scores["The Lurking Fear"] += 70
+
+        if self.voc_match(phrase, "mountains"):
+            scores["At The Mountains Of Madness"] += 70
 
         if self.voc_match(phrase, "tomb"):
             scores["The Tomb"] += 70
@@ -199,13 +177,12 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
                 yield {
                     "match_confidence": min(100, v),
                     "media_type": MediaType.AUDIOBOOK,
-                    "uri": self.urls[k],
+                    "uri": self.db[k]["uri"],
                     "playback": PlaybackType.AUDIO,
-                    "image": self.pictures[k],
+                    "image":  join(dirname(__file__), self.db[k]["image"]),
                     "bg_image": self.default_bg,
                     "skill_icon": self.skill_icon,
-                    "skill_logo": self.skill_logo,
-                    "length": self.durations[k] * 1000,
+                    "length": self.db[k]["length"],
                     "title": k,
                     "author": "H. P. Lovecraft",
                     "album": "read by Wayne June"

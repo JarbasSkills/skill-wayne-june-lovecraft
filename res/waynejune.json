@@ -1,0 +1,82 @@
+{
+    "The Tomb": {
+        "uri": "youtube//https://www.youtube.com/watch?v=6yIqQ2O-zws",
+        "image": "ui/tomb.jpeg",
+        "length": 1738000,
+        "title": "The Tomb",
+        "author": "H. P. Lovecraft",
+        "album": "read by Wayne June"
+    },
+    "The Shunned House": {
+        "uri": "youtube//https://www.youtube.com/watch?v=77xxGopjMbY",
+        "image": "ui/shunned_house.jpeg",
+        "length": 4704000,
+        "title": "The Shunned House",
+        "author": "H. P. Lovecraft",
+        "album": "read by Wayne June"
+    },
+    "At The Mountains Of Madness": {
+        "uri": "youtube//https://www.youtube.com/watch?v=Xq5_iA_wF5o",
+        "image": "ui/mountains.jpeg",
+        "length": 17763000,
+        "title": "At The Mountains Of Madness",
+        "author": "H. P. Lovecraft",
+        "album": "read by Wayne June"
+    },
+    "The Horror At Red Hook": {
+        "uri": "https://archive.org/download/youtube-rMhYkkaR8HU/H.P._Lovecraft_-_The_Horror_At_Red_Hook_-_Wayne_June-rMhYkkaR8HU.mp4",
+        "image": "ui/red_hook.jpeg",
+        "length": 3862000,
+        "title": "The Horror At Red Hook",
+        "author": "H. P. Lovecraft",
+        "album": "read by Wayne June"
+    },
+    "The Shadow Over Innsmouth": {
+        "uri": "https://archive.org/download/youtube-aFZrqYn5f_0/H.P._Lovecraft_-_The_Shadow_Over_Innsmouth_-_Wayne_June-aFZrqYn5f_0.mp4",
+        "image": "ui/innsmouth.jpeg",
+        "length": 10402000,
+        "title": "The Shadow Over Innsmouth",
+        "author": "H. P. Lovecraft",
+        "album": "read by Wayne June"
+    },
+    "Herbert West–Reanimator": {
+        "uri": "https://archive.org/download/youtube-GfHClVEPcjU/H.P._Lovecraft_-_Herbert_West_Reanimator_-_Wayne_June-GfHClVEPcjU.mp4",
+        "image": "ui/herbertwest.png",
+        "length": 5447000,
+        "title": "Herbert West–Reanimator",
+        "author": "H. P. Lovecraft",
+        "album": "read by Wayne June"
+    },
+    "The Lurking Fear": {
+        "uri": "https://archive.org/download/youtube--CZZo_y3TB8/H.P._LOVECRAFT_-_The_Lurking_Fear_-_Wayne_June--CZZo_y3TB8.mp4",
+        "image": "ui/lurking.jpeg",
+        "length": 3726000,
+        "title": "The Lurking Fear",
+        "author": "H. P. Lovecraft",
+        "album": "read by Wayne June"
+    },
+    "The Call Of Cthulhu": {
+        "uri": "https://archive.org/download/youtube-EHGj5M8WIAQ/THE_CALL_OF_CTHULHU_-_H.P._LOVECRAFT_-_Wayne_June-EHGj5M8WIAQ.mp4",
+        "image": "ui/call.jpeg",
+        "length": 4760000,
+        "title": "The Call Of Cthulhu",
+        "author": "H. P. Lovecraft",
+        "album": "read by Wayne June"
+    },
+    "The Dunwich Horror": {
+        "uri": "https://archive.org/download/youtube-OL8iuoZqX_U/H.P._Lovecraft_-_The_Dunwich_Horror_-_Wayne_June-OL8iuoZqX_U.mp4",
+        "image": "ui/dunwich.jpeg",
+        "length": 6690000,
+        "title": "The Dunwich Horror",
+        "author": "H. P. Lovecraft",
+        "album": "read by Wayne June"
+    },
+    "The Thing On The Doorstep": {
+        "uri": "https://archive.org/download/youtube-gHLEGzu8Dw8/H.P._Lovecraft_-_The_Thing_On_The_Doorstep_-_Wayne_June-gHLEGzu8Dw8.mp4",
+        "image": "ui/thing.png",
+        "length": 4669000,
+        "title": "The Thing On The Doorstep",
+        "author": "H. P. Lovecraft",
+        "album": "read by Wayne June"
+    }
+}
