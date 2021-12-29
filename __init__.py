@@ -1,8 +1,9 @@
 from os.path import join, dirname
-from json_database import JsonStorage
 
+from json_database import JsonStorage
 from ovos_workshop.skills.common_play import OVOSCommonPlaybackSkill, \
-    MediaType, PlaybackType, MatchConfidence, ocp_search
+    MatchConfidence, ocp_search, ocp_featured_media
+from ovos_plugin_common_play import PlaybackType, MediaType
 
 
 class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
@@ -45,34 +46,18 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
         score = self.get_base_score(phrase)
         if self.voc_match(phrase, "wayne_june"):
             score += 50
-        pl = [
-            {
-                "match_confidence": score,
-                "media_type": MediaType.AUDIOBOOK,
-                "uri": entry["uri"],
-                "playback": PlaybackType.AUDIO,
-                "image": join(dirname(__file__), entry["image"]),
-                "bg_image": self.default_bg,
-                "skill_icon": self.skill_icon,
-                "length": entry["length"],
-                "title": title,
-                "author": "H. P. Lovecraft",
-                "album": "read by Wayne June"
-            } for title, entry in self.db.items()
-        ]
-        if pl:
-            yield {
-                "match_confidence": score,
-                "media_type": MediaType.AUDIOBOOK,
-                "playlist": pl,
-                "playback": PlaybackType.AUDIO,
-                "skill_icon": self.skill_icon,
-                "image": self.default_bg,
-                "bg_image": self.default_bg,
-                "title": "Lovecraft - read by Wayne June (Compilation Playlist)",
-                "author": "H. P. Lovecraft",
-                "album": "read by Wayne June"
-            }
+        yield {
+            "match_confidence": score,
+            "media_type": MediaType.AUDIOBOOK,
+            "playlist": self.featured_media(),
+            "playback": PlaybackType.AUDIO,
+            "skill_icon": self.skill_icon,
+            "image": self.default_bg,
+            "bg_image": self.default_bg,
+            "title": "Lovecraft - read by Wayne June (Compilation Playlist)",
+            "author": "H. P. Lovecraft",
+            "album": "read by Wayne June"
+        }
 
     def clean_vocs(self, phrase):
         phrase = self.remove_voc(phrase, "reading")
@@ -179,7 +164,7 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
                     "media_type": MediaType.AUDIOBOOK,
                     "uri": self.db[k]["uri"],
                     "playback": PlaybackType.AUDIO,
-                    "image":  join(dirname(__file__), self.db[k]["image"]),
+                    "image": join(dirname(__file__), self.db[k]["image"]),
                     "bg_image": self.default_bg,
                     "skill_icon": self.skill_icon,
                     "length": self.db[k]["length"],
@@ -187,6 +172,22 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
                     "author": "H. P. Lovecraft",
                     "album": "read by Wayne June"
                 }
+
+    @ocp_featured_media()
+    def featured_media(self):
+        return [
+            {"media_type": MediaType.AUDIOBOOK,
+             "uri": entry["uri"],
+             "playback": PlaybackType.AUDIO,
+             "image": join(dirname(__file__), entry["image"]),
+             "bg_image": self.default_bg,
+             "skill_icon": self.skill_icon,
+             "length": entry["length"],
+             "title": title,
+             "author": "H. P. Lovecraft",
+             "album": "read by Wayne June"
+             } for title, entry in self.db.items()
+        ]
 
 
 def create_skill():
