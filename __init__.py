@@ -1,23 +1,31 @@
 from os.path import join, dirname
 
 from json_database import JsonStorage
-from ovos_workshop.skills.common_play import OVOSCommonPlaybackSkill, \
-    MatchConfidence, ocp_search, ocp_featured_media
-from ovos_plugin_common_play import PlaybackType, MediaType
+from ovos_utils.ocp import MediaType, PlaybackType
+from ovos_workshop.decorators.ocp import ocp_search, ocp_featured_media
+from ovos_workshop.skills.common_play import OVOSCommonPlaybackSkill
 
 
 class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
-
-    def __init__(self):
-        super().__init__("Wayne June Lovecraft Readings")
-        self.supported_media = [MediaType.GENERIC,
-                                MediaType.AUDIOBOOK,
+    def __init__(self, *args, **kwargs):
+        self.supported_media = [MediaType.AUDIOBOOK,
                                 MediaType.VISUAL_STORY,
                                 MediaType.VIDEO]
         self.default_image = join(dirname(__file__), "ui", "wayne_june.png")
         self.skill_icon = join(dirname(__file__), "ui", "icon.png")
         self.default_bg = join(dirname(__file__), "ui", "bg.jpeg")
         self.db = JsonStorage(join(dirname(__file__), "res", "waynejune.json"))
+        super().__init__(*args, **kwargs)
+
+        self.register_ocp_keyword(MediaType.AUDIOBOOK,
+                                  "book_name", list(self.db.keys()))
+        self.register_ocp_keyword(MediaType.AUDIOBOOK,
+                                  "book_author", ["Lovecraft", "H. P. Lovecraft"])
+        self.register_ocp_keyword(MediaType.AUDIOBOOK,
+                                  "audiobook_narrator", ["Wayne June"])
+        self.register_ocp_keyword(MediaType.AUDIOBOOK,
+                                  "audiobook_streaming_provider",
+                                  ["HorrorBabble", "Horror Babble"])
 
     def get_base_score(self, phrase):
         score = 0
@@ -158,7 +166,7 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
             scores["The Shunned House"] += 50
 
         for k, v in scores.items():
-            if v >= MatchConfidence.AVERAGE_LOW:
+            if v >= 50:
                 yield {
                     "match_confidence": min(100, v),
                     "media_type": MediaType.AUDIOBOOK,
@@ -190,5 +198,3 @@ class WayneJuneLovecraftReadingsSkill(OVOSCommonPlaybackSkill):
         ]
 
 
-def create_skill():
-    return WayneJuneLovecraftReadingsSkill()
